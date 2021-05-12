@@ -58,6 +58,16 @@ router.get('/timeline/:userId', async (req, res) => {
   }
 });
 
+// Get all comments of a post
+router.get('/all-comments/:postId', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId).populate('comments');
+    return res.status(200).json(post)
+  } catch (err) {
+    res.status(500).json(err);
+  }   
+});
+
 // Get User's all posts
 router.get('/profile/:username', async (req, res) => {
   try {

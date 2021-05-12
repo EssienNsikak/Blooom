@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const users = require('./rotues/users');
+const comments = require('./rotues/comments');
 const auth = require('./rotues/auth');
 const posts = require('./rotues/posts');
 const multer = require('multer');
@@ -49,6 +50,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 app.use('/api/users', users);
 app.use('/api/auth', auth);
 app.use('/api/posts', posts);
+app.use('/api/comments', comments);
 
 
 
