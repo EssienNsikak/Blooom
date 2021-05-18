@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useRef, useContext } from 'react';
 import './login.css';
 import { loginCall } from '../../apiCalls.js';

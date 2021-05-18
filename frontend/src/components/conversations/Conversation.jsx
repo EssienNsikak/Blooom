@@ -1,15 +1,38 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import './conversation.css';
+import Axios from 'axios';
 
-export default function Conversation() {
+export default function Conversation({ conversation, currentUser }) {
+
+  const [user, setUser] = useState({});
+  const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
+
+  useEffect(() => {
+    const friendId = conversation.members.find(m => m !== currentUser._id);
+
+    const getUser = async () => {
+      try {
+        const res = await Axios.get('/users?userId=' + friendId);
+        setUser(res.data)
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getUser()
+  }, [conversation, currentUser]);
+
   return (
     <div className='conversation'>
       <img 
         className='conversationImg' 
-        src='https://scontent.flos1-1.fna.fbcdn.net/v/t1.6435-9/70350561_1375281302646530_2123589319003209728_n.jpg?_nc_cat=101&ccb=1-3&_nc_sid=8bfeb9&_nc_eui2=AeF8vBwTyBkyheM3Kc7xuBQ1KSdxofnc4ygpJ3Gh-dzjKMqrYA6Tyzs_KtwINqtDqQ46RQ95o_kEnDrZ8Nq1rYTp&_nc_ohc=uCySNbI9OywAX9-4FAg&_nc_ht=scontent.flos1-1.fna&oh=c6fb15053fca68b03db940c625a8cae5&oe=60C9A6C9' 
+        src={ 
+          user.profilePicture 
+            ? PUBLIC_FOLDER+user.profilePicture 
+            : PUBLIC_FOLDER + 'person/noAvatar.png' 
+        } 
         alt='' 
       />
-      <span className='conversationName'>Uduakobong</span>
+      <span className='conversationName'>{user.username}</span>
     </div>
   )
 }
