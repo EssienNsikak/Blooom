@@ -8,6 +8,8 @@ const users = require('./rotues/users');
 const comments = require('./rotues/comments');
 const auth = require('./rotues/auth');
 const posts = require('./rotues/posts');
+const conversations = require('./rotues/conversations');
+const messages = require('./rotues/messages');
 const multer = require('multer');
 const path = require('path');
 
@@ -51,6 +53,8 @@ app.use('/api/users', users);
 app.use('/api/auth', auth);
 app.use('/api/posts', posts);
 app.use('/api/comments', comments);
+app.use('/api/conversations', conversations);
+app.use('/api/messages', messages);
 
 
 
