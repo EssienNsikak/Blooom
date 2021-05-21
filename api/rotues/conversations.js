@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(500).json(err)
   }
-})
+});
 
 // Get conversation of a user
 router.get('/:userId', async (req, res) => {
@@ -24,6 +24,18 @@ router.get('/:userId', async (req, res) => {
   } catch (err) {
     res.status(500).json(err);
   }
-})
+});
+
+// Get conversationincludes two userId
+router.get('/find/:firstUserId/:secondUserId', async (req, res) => {
+  try {
+    const conversation = await Conversation.findOne({
+      members: { $all: [req.params.firstUserId, req.params.secondUserId] },
+    });
+    return res.status(200).json(conversation);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
 module.exports = router;
