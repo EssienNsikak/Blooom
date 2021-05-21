@@ -1,16 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import Axios from 'axios';
 import './chatOnline.css';
 
-export default function ChatOnline() {
+export default function ChatOnline({ onlineUsers, currentId, setCurrentChat }) {
+
+  const [ friends, setFriends ] = useState([]);
+  const [ onlineFriends, setOnlineFriends ] = useState([]);
+  const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
+
+  useEffect(() => {
+    const getFriends = async () => {
+      const res = await Axios.get('/users/friends/' + currentId);
+      setFriends(res.data);
+    };
+    getFriends();
+  }, [currentId]);
+
+  useEffect(() => {
+    setOnlineFriends(friends.filter((f)=> onlineUsers.includes(f._id)));
+  }, [friends, onlineUsers]);
+
+  const handleClick = async (user) => {
+    try {
+      const res = await Axios.get(`/conversations/find/${currentId}/${user._id}`);
+      setCurrentChat(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <div className='chatOnline'>
-      <div className='chatOnlineFriend'>
-        <div className='chatOnlineImgContainer'>
-          <img className='chatOnlineImg' src='https://scontent.flos1-1.fna.fbcdn.net/v/t1.6435-9/70350561_1375281302646530_2123589319003209728_n.jpg?_nc_cat=101&ccb=1-3&_nc_sid=8bfeb9&_nc_eui2=AeF8vBwTyBkyheM3Kc7xuBQ1KSdxofnc4ygpJ3Gh-dzjKMqrYA6Tyzs_KtwINqtDqQ46RQ95o_kEnDrZ8Nq1rYTp&_nc_ohc=uCySNbI9OywAX9-4FAg&_nc_ht=scontent.flos1-1.fna&oh=c6fb15053fca68b03db940c625a8cae5&oe=60C9A6C9' alt='' />
-          <div className='chatOnlineBadge'></div>
+      {onlineFriends.map((online) => (
+        <div className='chatOnlineFriend' onClick={() => handleClick(online)}>
+          <div className='chatOnlineImgContainer'>
+            <img 
+              className='chatOnlineImg' 
+              src= {
+                online?.profilePicture 
+                  ? PUBLIC_FOLDER + online.profilePicture 
+                  : PUBLIC_FOLDER+'person/noAvatar.png' 
+              }
+              alt='' 
+            />
+            <div className='chatOnlineBadge'></div>
+          </div>
+          <span className='chatOnlineName'>{online.username}</span>
         </div>
-        <span className='chatOnlineName'>Uduakobong</span>
-      </div>
+      ))}
     </div>
   )
 }
