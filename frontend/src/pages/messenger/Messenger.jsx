@@ -7,16 +7,44 @@ import './messenger.css';
 import ChatOnline from '../../components/chatOnline/ChatOnline';
 import { AuthContext } from '../../components/context/AuthContext';
 import Axios from 'axios';
+import { io } from 'socket.io-client';
 
 export default function Messenger() {
   const [ conversations, setConversations ] = useState([]);
-  const [ currentChat, setcurrentChat ] = useState(null);
+  const [ currentChat, setCurrentChat ] = useState(null);
   const [ messages, setMessages ] = useState([]);
   const [ newMessage, setNewMessage ] = useState('');
+  const [ arrivalMessage, setArrivalMessage ] = useState(null);
+  
+  const socket = useRef(io('ws://localhost:8900'));
 
   const { user } = useContext(AuthContext);
   const scrollRef = useRef();
 
+  useEffect(() => {
+    socket.current = io('ws://localhost:8900');
+    // Get message
+    socket.current.on('getMessage', data => {
+      setArrivalMessage({
+        sender: data.senderId,
+        text: data.text,
+        createdAt: Date.now()
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    arrivalMessage && currentChat?.members.includes(arrivalMessage.sender) &&
+    setMessages((prev) => [...prev, arrivalMessage])
+  }, [arrivalMessage, currentChat]);
+
+  useEffect(() => {
+    socket.current.emit('addUser', user._id);
+    socket.current.on('getUsers', users => {
+      console.log(users)
+    })
+  }, [user]);
+    
   useEffect(() => {
     const getConversations = async () => {
       try {
@@ -49,6 +77,15 @@ export default function Messenger() {
       conversationId: currentChat._id
     };
 
+    // Send Message
+    const receiverId = currentChat.members.find((member) => member !== user._id)
+
+    socket.current.emit('sendMessage', {
+      senderId: user._id,
+      receiverId,
+      text: newMessage
+    });
+
     try {
       const res = await Axios.post('/messages', message);
       setMessages([ ...messages, res.data ])
@@ -58,6 +95,7 @@ export default function Messenger() {
     }
   };
 
+  
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behaviour: 'smooth'});
   }, [messages])
@@ -72,7 +110,7 @@ export default function Messenger() {
           <div className='chatMenuWrapper'>
             <input placeholder='Search for friends' className='chatMenuInput' />
             {conversations.map((c) => (
-              <div onClick={() => setcurrentChat(c)}>
+              <div onClick={() => setCurrentChat(c)}>
                 <Conversation conversation={c} currentUser={user} />
               </div>
               
